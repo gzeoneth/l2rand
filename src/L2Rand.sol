@@ -30,6 +30,7 @@ contract L2Rand {
 
     function refund(uint256 l1block, address refundTo) external payable {
         require(block.number > l1block + WAIT_BEFORE_REFUND, "l1 block not yet relayed");
+        require(rand[l1block] == 0, "already reported");
         uint256 _bountyPaid = bountyPaid[l1block][msg.sender];
         require(_bountyPaid > 0, "no bounty paid");
         bountyPaid[l1block][msg.sender] = 0;
@@ -40,6 +41,7 @@ contract L2Rand {
     function report(uint256 l1block, uint256 value, address sender) external {
         require(msg.sender == l1RandAddressAlias, "only l1Rand can call");
         require(rand[l1block] == 0, "already reported");
+        require(block.number <= l1block + WAIT_BEFORE_REFUND, "too late");
         rand[value] = value;
         uint256 _bounty = bounty[l1block];
         bounty[l1block] = 0;
